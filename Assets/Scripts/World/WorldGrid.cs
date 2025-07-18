@@ -132,30 +132,54 @@ namespace VERTEX.Systems
             return neighbors;
         }
         
-        public bool CanPlaceTile(Vector2Int position, MaterialType materialType)
-        {
-            if (!IsValidPosition(position)) return false;
-            
-            Tile currentTile = GetTile(position);
-            if (currentTile != null && currentTile.materialType != MaterialType.Air)
-            {
-                return false; // Position occupied
-            }
-            
-            // Check if there's support below (for structural tiles)
-            if (materialType != MaterialType.Air)
-            {
-                Vector2Int belowPos = position + Vector2Int.down;
-                Tile belowTile = GetTile(belowPos);
-                
-                if (belowTile == null || !belowTile.IsStructural())
-                {
-                    return false; // No support below
-                }
-            }
-            
-            return true;
-        }
+// In WorldGrid.cs
+
+public bool CanPlaceTile(Vector2Int position, MaterialType materialType)
+{
+    // 1. 맵 범위 유효성 검사
+    if (!IsValidPosition(position)) return false;
+    
+    // 2. 이미 타일이 있는지 검사
+    Tile currentTile = GetTile(position);
+    if (currentTile != null && currentTile.materialType != MaterialType.Air)
+    {
+        return false; // Position is already occupied
+    }
+    
+    // 3. 지지대 확인 (핵심 변경 부분)
+    // 공기(Air)는 지지대 없이 아무데나 설치 가능
+    if (materialType == MaterialType.Air)
+    {
+        return true;
+    }
+    
+    // 구조물은 아래, 왼쪽, 또는 오른쪽에 지지대가 있어야 함
+    Vector2Int belowPos = position + Vector2Int.down;
+    Vector2Int leftPos = position + Vector2Int.left;
+    Vector2Int rightPos = position + Vector2Int.right;
+
+    Tile belowTile = GetTile(belowPos);
+    if (belowTile != null && belowTile.IsStructural())
+    {
+        return true; // 1. 아래에 지지대가 있음 (성공)
+    }
+
+    Tile leftTile = GetTile(leftPos);
+    if (leftTile != null && leftTile.IsStructural())
+    {
+        return true; // 2. 왼쪽에 지지대가 있음 (성공)
+    }
+
+    Tile rightTile = GetTile(rightPos);
+    if (rightTile != null && rightTile.IsStructural())
+    {
+        return true; // 3. 오른쪽에 지지대가 있음 (성공)
+    }
+
+    // 모든 조건을 만족하지 못하면 건설 불가
+    Debug.Log($"Cannot place tile at {position}. No support found below, left, or right.");
+    return false; 
+}
         
         public Vector2Int WorldToGridPosition(Vector3 worldPosition)
         {
