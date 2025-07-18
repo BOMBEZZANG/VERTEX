@@ -1,0 +1,80 @@
+Document 2: Physics Calculation Model Proposal
+Proposal for the Core Physics Simulation Calculation Model
+The foundational principle of this model is to be event-driven, not real-time. Calculations are triggered only when a change occurs in the world structure to ensure performance.
+
+1. Basic Data Structure
+First, every tile (block) in the game world should contain the following information:
+
+// Example data structure for each tile (block)
+Tile {
+  MaterialType: Enum (Wood, Stone, Dirt, Air...);
+  Mass: float;          // Its own intrinsic weight (e.g., Wood=5, Stone=20)
+  SupportValue: float;  // The maximum load it can bear (e.g., Wood=100, Stone=500)
+  CurrentLoad: float;   // The load it is currently bearing (this value will be calculated)
+  IsFoundation: bool;   // A flag to identify if this is a 'foundation' block touching the initial ground surface
+  IsSupported: bool;    // A flag to check if there is a supporting block directly below it
+}
+
+2. The Calculation Trigger (When to Calculate)
+The 'Structure Update' function is called, starting at position (x, y), at the moment a player installs or removes a tile.
+
+3. Calculation Order and Method
+Calculations must always proceed Top-Down, as a block's load is determined by what is placed upon it.
+
+'Structure Update' Function Logic:
+
+Identify Affected Area: All structures above the changed block at (x, y) are designated as 'Targets for Update'.
+
+Reset Load: The CurrentLoad value of all 'Targets for Update' is reset to 0.
+
+Recalculate Load (Top-Down Traversal):
+
+Iterate from the highest Y-coordinate of the 'Targets for Update' downwards.
+
+For each block B, perform the following calculations:
+a.  B.CurrentLoad += B.Mass; (First, add its own mass to its load.)
+b.  Find the block B_down at the position directly below (x, y-1).
+c.  If B_down exists and is a structural block (i.e., not air), then B_down.CurrentLoad += B.CurrentLoad; (The total calculated load of B is transferred to the block below it.)
+
+※ Note: In a full implementation, a single block's load might be distributed among several supporting blocks below it. However, for this prototype, a simple 1-to-1 vertical load transfer is sufficient to validate the core mechanic.
+
+4. Calculation Method for Each Element (Specific Examples)
+Block Mass & Support Value (Example Values)
+
+
+Material	Mass	Support Value
+Wood	5	100
+Stone	20	500
+Steel	15	1500
+
+
+Load (CurrentLoad) Calculation:
+
+Calculated using the top-down cumulative method described in the 'Calculation Order'.
+
+Ground Stability Calculation:
+
+TotalGroundLoad = The sum of CurrentLoad for all blocks where IsFoundation is true.
+
+MaxGroundSupport = (Total Number of Foundation Blocks) * (Average Support per Surface Tile).
+
+Example: If one surface tile can support 1000 load, and there are 10 foundation blocks, the MaxGroundSupport is 10,000.
+
+This MaxGroundSupport value can be increased later through underground reinforcement projects.
+
+Collapse Handling:
+
+After the load recalculation is complete, iterate through all blocks and check the following conditions:
+
+if (CurrentLoad > SupportValue) → The corresponding block collapses.
+
+if (TotalGroundLoad > MaxGroundSupport) → All IsFoundation blocks collapse (triggering a sinkhole event).
+
+Collapse Implementation: A collapsed block is 'destroyed' and turns into an item drop, or it is converted into a 'falling block' entity with physics applied. The destruction of a block immediately triggers a 'block removed' event at its location, which in turn triggers another 'Structure Update'. This is the key to creating chain-reaction collapses.
+
+Minimalist UI Recommendation
+Construction Menu: Displays icons for wood blocks, stone blocks, wood pillars, and stone pillars.
+
+Resource Display: Shows the current count of Wood, Stone, Coal, and Iron on a corner of the screen.
+
+Structural View (Overlay - Highly Recommended): A mode, activated by a keypress, that displays the load status of each block using colors (e.g., Green: Safe, Yellow: Stressed, Red: Critical). This will be crucial for players to intuitively understand the game's physics.

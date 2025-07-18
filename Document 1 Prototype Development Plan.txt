@@ -1,0 +1,62 @@
+Document 1: Prototype Development Plan
+Project VERTEX: Prototype Development Plan
+1. Project Overview
+Project Name (Working Title): Project VERTEX
+
+Concept: A vertical physics-puzzle sandbox where the player must build a tower upwards while simultaneously digging downwards to reinforce the ground, managing the load of the tower.
+
+Target Platform: PC (Steam)
+
+Development Engine: Unity or Godot (Chosen for ease of use with 2D physics).
+
+2. Core Objective of the Prototype
+This prototype exists to answer a single question:
+
+Is the core gameplay loop (Build → Face Limitation → Reinforce Underground → Retry) inherently fun and intellectually satisfying?
+
+Obtaining a "Yes" to this question is the sole objective; everything else is secondary.
+
+3. Core Features (Scope Definition)
+[In-Scope Features]
+
+Basic Unit Control: The ability to select one or more units and command them to 'Move', 'Dig', and 'Build'.
+
+2D Tile-Based World: A map with a fixed horizontal width that scrolls infinitely only in the vertical direction.
+
+Resource Tiers (2 Tiers):
+
+Tier 1: Wood (Acquired from the surface).
+
+Tier 2: Stone, Coal, Iron (Acquired from the shallow underground).
+
+Core Physics Simulation:
+
+Block Mass: Every tile and machine has a unique 'mass' value.
+
+Load & Support: Blocks must bear the cumulative 'load' from all objects above them. Each material (wood, stone) has a unique 'support' limit.
+
+Ground Stability: A value representing the total load that the surface-layer tiles beneath the tower's foundation can withstand.
+
+Collapse: A collapse event occurs if a block's load exceeds its support value, or if the ground stability reaches zero.
+
+Basic Construction:
+
+Ability to construct Wood/Stone blocks, Wood supports/pillars, and Stone pillars.
+
+Minimalist crafting facilities to process resources (e.g., Workbench, Furnace).
+
+Minimalist UI: A minimal interface required to operate core functions, such as displaying resource counts and a construction menu.
+
+[Out-of-Scope Features]
+
+All Complex Simulations: All gas, liquid, temperature, and electrical systems are excluded.
+
+Complex Unit AI: All psychological/status systems such as stress, hygiene, skills, and diseases are excluded.
+
+Combat and External Threats: All combat-related content, including wildlife and hostile factions, is excluded.
+
+Story and Quests: All narrative elements are excluded.
+
+Economic Systems: All economy-related systems such as currency, trade, and employment are excluded.
+
+Art and Sound: All art can be simple gray boxes. Sound will be absent or replaced with free sound effects.
